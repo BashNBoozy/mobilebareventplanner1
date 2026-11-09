@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mobile Bar Journey Event Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f0e8; --card:#fbf9f4; --ink:#2a2826; --muted:#6e675e; --line:#e4ddd0;
+  --accent:#2a2826; --accent-ink:#f8f4ec; --accent-soft:#efe6d4; --gold:#b08d57; --gold-deep:#8a6a37; --ok:#2d6a58; --warn:#8a5a00; --warn-bg:#fff4d6;
+  --beer:#c98a1b; --wine:#7d2343; --cock:#2d6a58;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;letter-spacing:.01em;margin:0}
+button,input,select{font:inherit;color:inherit}
+header.top{padding:18px 18px 8px;max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:64px;height:64px;flex:none;border-radius:50%;background:#fbf9f4;border:1px solid var(--line);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.brand h1{font-size:22px;line-height:1.02;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.brand h1 small{display:block;font-size:12.5px;letter-spacing:.32em;font-weight:600}
+.brand h1 span{display:block;font-family:Inter,sans-serif;font-size:11px;letter-spacing:.28em;color:var(--gold-deep);font-weight:700;margin-top:5px}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.saved{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.saved select{max-width:190px}
+@media(max-width:600px){.saved{width:100%;flex-wrap:nowrap}.saved select{flex:1;max-width:none;min-width:0}}
+.grid{max-width:1180px;margin:0 auto;padding:8px 14px 90px;display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:960px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)} .results{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow:auto} #jump{display:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card h2{font-size:23px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h2 .n{font-family:Inter;font-size:12px;font-weight:700;background:var(--gold);color:#fff;border-radius:99px;width:22px;height:22px;display:inline-grid;place-items:center}
+.hint{color:var(--muted);font-size:13px;margin:4px 0 0}
+.row{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:420px){.row.three{grid-template-columns:1fr 1fr}}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+label.f.full{grid-column:1/-1}
+input[type=text],input[type=number],input[type=date],select{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;min-height:44px}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.stepper{display:flex;align-items:stretch}
+.stepper input{border-radius:0;text-align:center;border-left:0;border-right:0;-moz-appearance:textfield}
+.stepper input::-webkit-inner-spin-button{-webkit-appearance:none}
+.stepper button{width:44px;border:1px solid var(--line);background:#f3ece2;font-size:20px;font-weight:600;cursor:pointer}
+.stepper button:first-child{border-radius:10px 0 0 10px}.stepper button:last-child{border-radius:0 10px 10px 0}
+.seg{display:flex;background:#efe7db;border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:9px;font-weight:600;font-size:13.5px;cursor:pointer;min-height:40px;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 11px;font-size:13px;font-weight:600;cursor:pointer}
+.chip:hover{border-color:var(--gold)}
+.share{margin-top:10px}
+.share .lbl{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}
+.share .lbl b{font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--gold);height:30px;margin:0}
+.share.beer input{accent-color:var(--beer)}.share.wine input{accent-color:var(--wine)}.share.cocktail input{accent-color:var(--cock)}
+.bar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin-top:8px;background:#eee}
+.bar i{display:block;height:100%}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);margin-top:10px}
+.toggle span{font-weight:600;font-size:14px}.toggle small{display:block;color:var(--muted);font-weight:400;font-size:12.5px}
+.switch{position:relative;width:48px;height:28px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch i{position:absolute;inset:0;background:#d6ccbe;border-radius:99px;transition:.15s}
+.switch i:after{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked+i{background:var(--gold)}.switch input:checked+i:after{transform:translateX(20px)}
+.sub{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:14px 0 2px}
+.sig{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;background:#fff}
+.sig-head{display:grid;grid-template-columns:1fr 130px 36px;gap:6px;align-items:center}
+.sig-name{font-weight:600}
+.ings{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.ing{display:grid;grid-template-columns:1fr 70px 46px 110px 30px;gap:5px;align-items:center}
+.ing input,.ing select{min-height:38px;padding:7px 8px;font-size:15px}
+.ing .unit{font-size:12px;color:var(--muted)}
+@media(max-width:560px){
+  .ing{grid-template-columns:80px 50px 1fr 30px;grid-template-areas:"name name name x" "amt unit type type";border-bottom:1px dashed var(--line);padding-bottom:6px}
+  .ing [data-g=name]{grid-area:name}.ing [data-g=amt]{grid-area:amt}.ing .unit{grid-area:unit}.ing [data-g=type]{grid-area:type}.ing .icon{grid-area:x}
+  .sig-head{grid-template-columns:1fr 36px}.sig-head select{grid-column:1/-1;grid-row:2}
+}
+.icon{border:0;background:#f1e9de;border-radius:9px;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--muted)}
+.icon.sm{width:30px;height:30px;font-size:16px}
+.icon:hover{background:var(--accent-soft);color:var(--gold-deep)}
+.link{border:0;background:none;color:var(--gold-deep);font-weight:600;padding:8px 2px 2px;cursor:pointer;font-size:14px}
+.addsig{display:flex;gap:6px;margin-top:6px}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;border-radius:10px;padding:10px 14px;cursor:pointer;min-height:44px;white-space:nowrap}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{min-height:36px;padding:7px 11px;font-size:13.5px}
+.btn.danger{background:#fff;color:#a1261b;border:1px solid #efc9c3}
+.empty{color:var(--muted);font-size:14px;margin:4px 0 8px}
+.dim{opacity:.55}
+details.card summary{cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:650;list-style:none}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary:after{content:"＋";float:right;color:var(--muted)}
+details[open].card summary:after{content:"－"}
+.spmix{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:6px}
+
+/* results */
+.results .card{background:#fff}
+.rhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.rhead h2{font-size:28px}
+.rhead .meta{color:var(--muted);font-size:13.5px;margin-top:2px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+@media(min-width:560px){.tiles{grid-template-columns:repeat(5,1fr)}}
+.tile{background:#2a2826;color:#f8f4ec;border-radius:12px;padding:10px 10px 9px}
+.tile b{display:block;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile span{font-size:12px;color:var(--gold);font-weight:600}
+.warn{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:9px 12px;font-size:13.5px;margin:8px 0;font-weight:500}
+.group{margin-top:16px}
+.group h3{font-size:20px;display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--gold)}
+.group h3 i{width:10px;height:10px;border-radius:3px;display:inline-block}
+table.list{width:100%;border-collapse:collapse}
+table.list td{padding:9px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.list td:first-child{font-weight:600;width:42%}
+table.list td.buy{font-weight:700;font-variant-numeric:tabular-nums}
+table.list .d{display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:1px}
+.sigout{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.sigout b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sigout small{display:block;color:var(--muted);font-size:12.5px}
+.promo{margin-top:18px;background:#2a2826;color:#f8f4ec;border-radius:14px;padding:18px 18px 16px;text-align:center}
+.promo h3{font-size:24px;color:#f8f4ec;margin-bottom:6px}
+.promo p{margin:0 0 4px;font-size:14px;color:#e4dccd}
+.promo .sp{color:var(--gold)}
+.promo a.cta{display:inline-block;margin-top:12px;background:var(--gold);color:#1f1d1b;font-weight:700;text-decoration:none;border-radius:99px;padding:11px 20px}
+.promo .ig{display:block;margin-top:10px;font-size:13px;color:var(--gold)}
+.foot{color:var(--muted);font-size:12.5px;margin-top:14px;line-height:1.5}
+#jump{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.25);border-radius:99px;padding:12px 20px}
+.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:9}
+.toast.show{opacity:1}
+textarea.fallback{width:100%;height:220px;margin-top:10px;font:13px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;padding:10px}
+@media print{header.top .saved,#jump,.inputs,.btn{display:none!important}.grid{display:block}.results{position:static;max-height:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#2a2826" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10h22L19 22z"/><path d="M19 22v11M13.5 33h11"/><path d="M24.5 10l4-5"/><circle cx="29.3" cy="4.3" r="1.6"/><path d="M33 15l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="#b08d57" stroke="#b08d57" stroke-width=".6"/><path d="M6 19l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z" fill="#b08d57" stroke="#b08d57" stroke-width=".6"/></svg></div>
+    <div><h1><small>The</small>Mobile Bar Journey<span>Event Planner</span></h1>
+    <p>Real numbers for your bar — exactly what to buy, nothing you'll haul home.</p></div>
+  </div>
+  <div class="saved">
+    <select id="savedSel" aria-label="Saved events"><option value="">Saved events…</option></select>
+    <button class="btn sm" id="saveBtn">Save</button>
+    <button class="btn sm ghost" id="newBtn">New</button>
+    <button class="btn sm danger" id="delBtn" hidden>Delete</button>
+  </div>
+</header>
+
+<main class="grid">
+<section class="inputs">
+
+  <div class="card">
+    <h2><span class="n">1</span>The event</h2>
+    <div class="row">
+      <label class="f full">Event name<input type="text" data-bind="eventName" placeholder="e.g. Smith Wedding"></label>
+      <label class="f">Date<input type="date" data-bind="eventDate"></label>
+      <label class="f">Bar open (hours)
+        <div class="stepper"><button type="button" data-step="hours" data-d="-0.5" aria-label="Fewer hours">−</button><input type="number" inputmode="decimal" data-bind="hours" min="0.5" max="12" step="0.5"><button type="button" data-step="hours" data-d="0.5" aria-label="More hours">+</button></div>
+      </label>
+      <label class="f">Total guests
+        <div class="stepper"><button type="button" data-step="guests" data-d="-5" aria-label="Fewer guests">−</button><input type="number" inputmode="numeric" data-bind="guests" min="1" max="5000" step="1"><button type="button" data-step="guests" data-d="5" aria-label="More guests">+</button></div>
+      </label>
+      <label class="f">Not drinking (%)<input type="number" inputmode="numeric" data-bind="nonDrinkPct" min="0" max="90" step="1"></label>
+    </div>
+    <p class="hint">Not drinking = kids, designated drivers, non-drinkers. <span id="drinkersNote"></span></p>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span>Drinking style</h2>
+    <div class="seg" data-seg="style">
+      <button type="button" data-v="light">Light</button>
+      <button type="button" data-v="moderate">Moderate</button>
+      <button type="button" data-v="heavy">Party</button>
+    </div>
+    <p class="hint" id="styleHint"></p>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">3</span>Bar setup</h2>
+    <div class="seg" data-seg="barType">
+      <button type="button" data-v="full">Full bar</button>
+      <button type="button" data-v="limited">Beer, wine + signatures</button>
+      <button type="button" data-v="beerwine">Beer &amp; wine</button>
+    </div>
+    <p class="hint" id="barHint"></p>
+
+    <div class="sub">What will people drink?</div>
+    <div class="chips" id="mixPresets">
+      <button type="button" class="chip" data-preset="balanced">Balanced</button>
+      <button type="button" class="chip" data-preset="beer">Beer crowd</button>
+      <button type="button" class="chip" data-preset="wine">Wine crowd</button>
+      <button type="button" class="chip" data-preset="cocktail">Cocktail crowd</button>
+    </div>
+    <div class="share beer"><div class="lbl">Beer <b data-out="mix.beer"></b></div><input type="range" min="0" max="100" step="1" data-share="mix.beer" aria-label="Beer share"></div>
+    <div class="share wine"><div class="lbl">Wine <b data-out="mix.wine"></b></div><input type="range" min="0" max="100" step="1" data-share="mix.wine" aria-label="Wine share"></div>
+    <div class="share cocktail" id="cocktailShare"><div class="lbl">Cocktails <b data-out="mix.cocktail"></b></div><input type="range" min="0" max="100" step="1" data-share="mix.cocktail" aria-label="Cocktail share"></div>
+    <div class="bar" id="mixBar"></div>
+
+    <div id="sigShareRow" class="share"><div class="lbl">Of the cocktails, signature drinks <b data-out="sigShare"></b></div><input type="range" min="0" max="100" step="5" data-bind="sigShare" aria-label="Signature share of cocktails">
+      <p class="hint">The rest are standard mixed drinks (vodka soda, rum &amp; coke…).</p></div>
+
+    <div class="sub">Wine split</div>
+    <div class="share"><div class="lbl">Red <b data-out="wineMix.red"></b></div><input type="range" min="0" max="100" step="5" data-share="wineMix.red" aria-label="Red wine share"></div>
+    <div class="share"><div class="lbl">White <b data-out="wineMix.white"></b></div><input type="range" min="0" max="100" step="5" data-share="wineMix.white" aria-label="White wine share"></div>
+    <div class="share"><div class="lbl">Rosé <b data-out="wineMix.rose"></b></div><input type="range" min="0" max="100" step="5" data-share="wineMix.rose" aria-label="Rosé share"></div>
+
+    <label class="toggle"><span>Champagne toast<small>One pour per drinking guest, on top of everything else</small></span>
+      <span class="switch"><input type="checkbox" data-bind="champagne"><i></i></span></label>
+  </div>
+
+  <div class="card" id="sigCard">
+    <h2><span class="n">4</span>Signature drinks</h2>
+    <p class="hint" id="sigHint" style="margin:-4px 0 10px">Enter each recipe for <b>one drink</b>. Amounts are in ounces unless the unit says otherwise.</p>
+    <div id="sigList"></div>
+    <div class="addsig">
+      <select id="presetSel" aria-label="Recipe to add"></select>
+      <button class="btn" id="addSigBtn" type="button">Add</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">5</span>Ice &amp; extras</h2>
+    <div class="seg" data-seg="weather">
+      <button type="button" data-v="indoor">Indoors</button>
+      <button type="button" data-v="outdoor">Outdoors</button>
+      <button type="button" data-v="hot">Hot day</button>
+    </div>
+    <label class="toggle"><span>Chilling drinks on ice<small>Beer &amp; white wine in tubs or coolers</small></span>
+      <span class="switch"><input type="checkbox" data-bind="chill"><i></i></span></label>
+    <label class="toggle"><span>Include cups, napkins &amp; water<small>Adds a supplies section to the list</small></span>
+      <span class="switch"><input type="checkbox" data-bind="supplies"><i></i></span></label>
+    <div class="share" style="margin-top:4px"><div class="lbl">Safety buffer <b data-out="buffer"></b></div><input type="range" min="0" max="30" step="5" data-bind="buffer" aria-label="Safety buffer"></div>
+    <p class="hint">Extra on top of the estimate so you don't run dry. 10% is typical.</p>
+  </div>
+
+  <details class="card">
+    <summary>Advanced settings</summary>
+    <div class="row three" style="margin-top:12px">
+      <label class="f">Liquor pour (oz)<input type="number" inputmode="decimal" step="0.25" min="0.5" max="4" data-bind="pourSpirit"></label>
+      <label class="f">Wine pour (oz)<input type="number" inputmode="decimal" step="0.5" min="2" max="9" data-bind="pourWine"></label>
+      <label class="f">Toast pour (oz)<input type="number" inputmode="decimal" step="0.5" min="1" max="6" data-bind="pourToast"></label>
+      <label class="f">Mixer per drink (oz)<input type="number" inputmode="decimal" step="0.5" min="0" max="10" data-bind="mixerOz"></label>
+      <label class="f" style="grid-column:span 2">Drinks per drinking guest (override)<input type="number" inputmode="decimal" step="0.5" min="0" max="20" data-bind="override" placeholder="Leave blank for auto"></label>
+    </div>
+    <div class="sub">Full-bar liquor mix (%)</div>
+    <div class="spmix" id="spiritMix"></div>
+    <p class="hint">Used for standard mixed drinks only. Signature recipes add their own liquor.</p>
+    <button class="link" id="resetAdv" type="button">Reset advanced to defaults</button>
+  </details>
+
+</section>
+
+<section class="results" id="results" aria-live="polite"></section>
+</main>
+
+<button class="btn" id="jump" type="button">See shopping list ↓</button>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var $ = function(s,el){return (el||document).querySelector(s)};
+var $$ = function(s,el){return Array.prototype.slice.call((el||document).querySelectorAll(s))};
+var clamp = function(v,a,b){return Math.min(b,Math.max(a,v))};
+var num = function(v,d){var n=parseFloat(v);return isFinite(n)?n:d};
+var fmt = function(n){return Math.round(n).toLocaleString()};
+var esc = function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var clone = function(o){return JSON.parse(JSON.stringify(o))};
+
+var OZ750=25.36, OZ175=59.17, OZ1L=33.81;
+
+var STYLES={
+  light:{first:1,rest:0.75,hint:"Sipping crowd — about 1 drink the first hour, then roughly 3 every 4 hours."},
+  moderate:{first:2,rest:1,hint:"Typical wedding or party — 2 drinks the first hour, then 1 per hour."},
+  heavy:{first:2.5,rest:1.5,hint:"Celebrating hard — 2–3 drinks the first hour, then 1½ per hour."}
+};
+var BAR_HINTS={
+  full:"Beer, wine, standard mixed drinks, plus any signature cocktails.",
+  limited:"Beer and wine, with cocktails limited to your signature drinks.",
+  beerwine:"No liquor — just beer and wine (plus a toast if you want one)."
+};
+var MIX_PRESETS={balanced:{beer:35,wine:35,cocktail:30},beer:{beer:55,wine:20,cocktail:25},wine:{beer:20,wine:55,cocktail:25},cocktail:{beer:25,wine:25,cocktail:50}};
+var TYPES={
+  spirit:{label:"Liquor",unit:"oz"}, liqueur:{label:"Liqueur",unit:"oz"}, wine:{label:"Wine / bubbly",unit:"oz"},
+  mixer:{label:"Soda / mixer",unit:"oz"}, juice:{label:"Juice",unit:"oz"}, syrup:{label:"Syrup",unit:"oz"},
+  bitters:{label:"Bitters",unit:"dash"}, garnish:{label:"Garnish",unit:"each"}, other:{label:"Other",unit:"oz"}
+};
+var WEIGHTS=[{v:0.5,l:"Less popular"},{v:1,l:"Normal"},{v:1.5,l:"Crowd favorite"}];
+var STD_MIXERS=[
+  {name:"Club soda",type:"mixer",pct:20},{name:"Tonic water",type:"mixer",pct:15},{name:"Cola",type:"mixer",pct:20},
+  {name:"Lemon-lime soda",type:"mixer",pct:10},{name:"Ginger ale",type:"mixer",pct:10},
+  {name:"Cranberry juice",type:"juice",pct:15},{name:"Orange juice",type:"juice",pct:5},{name:"Pineapple juice",type:"juice",pct:5}
+];
+var PRESETS={
+  "Moscow Mule":[["Vodka",2,"spirit"],["Ginger beer",4,"mixer"],["Lime juice",0.5,"juice"],["Lime wedge",1,"garnish"]],
+  "Margarita":[["Tequila",2,"spirit"],["Triple sec",1,"liqueur"],["Lime juice",1,"juice"],["Simple syrup",0.5,"syrup"],["Lime wheel",1,"garnish"]],
+  "Old Fashioned":[["Bourbon",2,"spirit"],["Simple syrup",0.25,"syrup"],["Angostura bitters",2,"bitters"],["Orange peel",1,"garnish"],["Cocktail cherry",1,"garnish"]],
+  "Mojito":[["Rum",2,"spirit"],["Lime juice",1,"juice"],["Simple syrup",0.75,"syrup"],["Club soda",2,"mixer"],["Mint sprig",2,"garnish"],["Lime wedge",1,"garnish"]],
+  "Paloma":[["Tequila",2,"spirit"],["Grapefruit juice",3,"juice"],["Lime juice",0.5,"juice"],["Club soda",1,"mixer"],["Lime wedge",1,"garnish"]],
+  "Aperol Spritz":[["Aperol",2,"liqueur"],["Prosecco",3,"wine"],["Club soda",1,"mixer"],["Orange slice",1,"garnish"]],
+  "Espresso Martini":[["Vodka",1.5,"spirit"],["Coffee liqueur",1,"liqueur"],["Cold brew / espresso",1,"other"],["Simple syrup",0.25,"syrup"],["Coffee beans",3,"garnish"]],
+  "Whiskey Sour":[["Bourbon",2,"spirit"],["Lemon juice",0.75,"juice"],["Simple syrup",0.75,"syrup"],["Cocktail cherry",1,"garnish"]],
+  "Spiked Lemonade":[["Vodka",1.5,"spirit"],["Lemonade",4,"juice"],["Lemon wheel",1,"garnish"]]
+};
+var ADV_DEFAULTS={pourSpirit:1.5,pourWine:5,pourToast:4,mixerOz:4,override:"",
+  spiritMix:[{name:"Vodka",pct:30},{name:"Tequila",pct:20},{name:"Bourbon",pct:20},{name:"Rum",pct:15},{name:"Gin",pct:15}]};
+var DEFAULTS={
+  eventName:"",eventDate:"",guests:100,hours:4,nonDrinkPct:10,style:"moderate",barType:"full",
+  mix:{beer:35,wine:35,cocktail:30},wineMix:{red:40,white:50,rose:10},sigShare:60,champagne:false,
+  weather:"indoor",chill:true,supplies:true,buffer:10,sigs:[]
+};
+for(var k in ADV_DEFAULTS) DEFAULTS[k]=clone(ADV_DEFAULTS[k]);
+
+/* ---------- storage (optional convenience) ---------- */
+var store={
+  get:function(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}},
+  set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+};
+function sanitize(o){
+  var s=clone(DEFAULTS);
+  if(!o||typeof o!=="object")return s;
+  for(var k in s){ if(o[k]!==undefined && typeof o[k]===typeof s[k]) s[k]=clone(o[k]); }
+  if(!Array.isArray(s.sigs))s.sigs=[];
+  s.sigs=s.sigs.filter(function(g){return g&&Array.isArray(g.ings)}).map(function(g){
+    return {id:g.id||uid(),name:String(g.name||""),weight:num(g.weight,1),
+      ings:g.ings.map(function(i){return {name:String(i.name||""),amt:num(i.amt,0),type:TYPES[i.type]?i.type:"other"}})};
+  });
+  if(!Array.isArray(s.spiritMix)||!s.spiritMix.length)s.spiritMix=clone(ADV_DEFAULTS.spiritMix);
+  return s;
+}
+function uid(){return "s"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+var S=sanitize(store.get("pourplan.current"));
+
+/* ---------- share sliders that always total 100 ---------- */
+function getPath(p){var a=p.split(".");return a.length>1?S[a[0]][a[1]]:S[a[0]]}
+function setShare(group,key,v){
+  var obj=S[group], keys=Object.keys(obj);
+  if(group==="mix"&&S.barType==="beerwine") keys=["beer","wine"];
+  v=clamp(Math.round(v),0,100);
+  var others=keys.filter(function(x){return x!==key});
+  var rem=100-v, sumO=others.reduce(function(a,x){return a+obj[x]},0);
+  var vals=others.map(function(x){return sumO>0?obj[x]/sumO*rem:rem/others.length});
+  var rounded=vals.map(Math.round), diff=rem-rounded.reduce(function(a,b){return a+b},0);
+  if(rounded.length){ // put rounding remainder on the largest
+    var mi=0; rounded.forEach(function(r,i){if(r>rounded[mi])mi=i}); rounded[mi]+=diff;
+  }
+  others.forEach(function(x,i){obj[x]=Math.max(0,rounded[i])});
+  obj[key]=v;
+}
+
+/* ---------- calculation (pure) ---------- */
+function compute(S){
+  var R={warnings:[],items:{},sigOut:[]};
+  var G=clamp(Math.round(num(S.guests,0)),0,5000);
+  var H=clamp(num(S.hours,0),0,12);
+  var nd=clamp(num(S.nonDrinkPct,0),0,100);
+  var drinkers=G*(1-nd/100);
+  var st=STYLES[S.style]||STYLES.moderate;
+  var per = num(S.override,0)>0 ? num(S.override,0) : (H<=1 ? st.first*H : st.first+(H-1)*st.rest);
+  var total=drinkers*per;
+  var b=1+clamp(num(S.buffer,0),0,100)/100;
+  var sigs=S.sigs.filter(function(s){return s.ings.some(function(i){return i.amt>0})});
+  S.sigs.forEach(function(s){ if(!s.ings.some(function(i){return i.amt>0})) R.warnings.push("“"+(s.name||"Untitled drink")+"” has no ingredient amounts yet, so it isn't counted."); });
+
+  var bt=S.barType;
+  if(bt==="limited"&&!sigs.length){R.warnings.push("Add a signature drink to pour cocktails. Until then, the cocktail share is split between beer and wine.");bt="beerwine";}
+  var m=S.mix, shares;
+  if(bt==="beerwine"){var bw=m.beer+m.wine; shares=bw>0?{beer:m.beer/bw,wine:m.wine/bw,cocktail:0}:{beer:.5,wine:.5,cocktail:0};}
+  else shares={beer:m.beer/100,wine:m.wine/100,cocktail:m.cocktail/100};
+
+  var beerD=total*shares.beer, wineD=total*shares.wine, cockD=total*shares.cocktail;
+  var sigD=0, stdD=0;
+  if(bt==="full"){ sigD = sigs.length ? cockD*clamp(num(S.sigShare,0),0,100)/100 : 0; stdD=cockD-sigD; }
+  else if(bt==="limited"){ sigD=cockD; }
+
+  R.G=G;R.H=H;R.drinkers=drinkers;R.per=per;R.total=total*b;R.buffer=b;
+  R.beerD=beerD*b;R.wineD=wineD*b;R.sigD=sigD*b;R.stdD=stdD*b;
+  if(bt!=="beerwine"&&S.barType==="full"&&!sigs.length&&cockD>0){} // fine: all standard
+
+  function add(name,type,qty,src){
+    if(!(qty>0))return; var key=type+"|"+name.trim().toLowerCase();
+    if(!R.items[key])R.items[key]={name:name.trim()||"Unnamed",type:type,qty:0,src:{}};
+    R.items[key].qty+=qty; if(src)R.items[key].src[src]=(R.items[key].src[src]||0)+qty;
+  }
+
+  // standard mixed drinks
+  var std=stdD*b, pour=clamp(num(S.pourSpirit,1.5),0.25,6), mixOz=clamp(num(S.mixerOz,4),0,16);
+  if(std>0){
+    var spSum=S.spiritMix.reduce(function(a,x){return a+Math.max(0,num(x.pct,0))},0)||1;
+    S.spiritMix.forEach(function(x){add(x.name,"spirit",std*pour*Math.max(0,num(x.pct,0))/spSum,"Mixed drinks")});
+    var mxSum=STD_MIXERS.reduce(function(a,x){return a+x.pct},0);
+    STD_MIXERS.forEach(function(x){add(x.name,x.type,std*mixOz*x.pct/mxSum,"Mixed drinks")});
+    add("Lime wedge","garnish",std*0.5,"Mixed drinks");
+    add("Lemon wedge","garnish",std*0.15,"Mixed drinks");
+  }
+  // signatures
+  var wSum=sigs.reduce(function(a,s){return a+(num(s.weight,1)||1)},0)||1;
+  sigs.forEach(function(s){
+    var n=sigD*b*(num(s.weight,1)||1)/wSum, label=s.name||"Signature";
+    R.sigOut.push({name:label,drinks:n,ings:s.ings});
+    s.ings.forEach(function(i){ if(i.amt>0) add(i.name||"Unnamed","" + i.type,i.amt*n,label); });
+  });
+
+  // beer
+  var beers=beerD*b;
+  R.beer={count:beers,cases:Math.ceil(beers/24)};
+  // wine
+  var wp=clamp(num(S.pourWine,5),1,12), wm=S.wineMix, wsum=(wm.red+wm.white+wm.rose)||1;
+  var wineOz=wineD*b*wp;
+  R.wine={glasses:wineD*b,red:Math.ceil(wineOz*wm.red/wsum/OZ750),white:Math.ceil(wineOz*wm.white/wsum/OZ750),rose:Math.ceil(wineOz*wm.rose/wsum/OZ750)};
+  if(wineOz<=0){R.wine.red=R.wine.white=R.wine.rose=0}
+  R.wine.total=R.wine.red+R.wine.white+R.wine.rose;
+  R.toast=null;
+  if(S.champagne&&drinkers>0){var tp=clamp(num(S.pourToast,4),1,8);var pours=drinkers*b;R.toast={pours:pours,bottles:Math.ceil(pours*tp/OZ750),per:Math.floor(OZ750/tp)}}
+
+  // build groups
+  var liquor=[],wineExtra=[],mixers=[],garnishFruit={};
+  var liquorBottles=0;
+  Object.keys(R.items).forEach(function(k){
+    var it=R.items[k], q=it.qty, srcs=Object.keys(it.src).join(", ");
+    if(it.type==="spirit"||it.type==="liqueur"){
+      var b750=Math.ceil(q/OZ750), alt="";
+      if(it.type==="spirit"&&q>OZ175*0.9){var h=Math.floor(q/OZ175),rem=q-h*OZ175,r=rem>0.5?Math.ceil(rem/OZ750):0; if(h>0)alt="or "+h+" × 1.75 L"+(r?" + "+r+" × 750 mL":"");}
+      liquorBottles+=b750;
+      liquor.push({name:it.name,buy:b750+" × 750 mL",d:[alt,"≈ "+fmt(q)+" oz · "+srcs].filter(Boolean).join(" · ")});
+    } else if(it.type==="wine"){
+      wineExtra.push({name:it.name,buy:Math.ceil(q/OZ750)+" × 750 mL",d:"≈ "+fmt(q)+" oz · "+srcs});
+    } else if(it.type==="mixer"){
+      mixers.push({name:it.name,buy:Math.ceil(q/OZ1L)+" × 1 L",d:"or "+Math.ceil(q/12)+" × 12 oz cans · ≈ "+fmt(q)+" oz · "+srcs});
+    } else if(it.type==="juice"){
+      var n=it.name.toLowerCase(), fresh="";
+      if(/lime/.test(n))fresh="or ~"+Math.ceil(q/1)+" fresh limes";
+      else if(/lemon/.test(n)&&!/lemonade/.test(n))fresh="or ~"+Math.ceil(q/1.5)+" fresh lemons";
+      else if(/grapefruit/.test(n))fresh="or ~"+Math.ceil(q/5)+" fresh grapefruit";
+      mixers.push({name:it.name,buy:Math.ceil(q/64)+" × ½ gal",d:[fresh,"≈ "+fmt(q)+" oz · "+srcs].filter(Boolean).join(" · ")});
+    } else if(it.type==="syrup"){
+      var cups=q/8, home=/simple/.test(it.name.toLowerCase())?" · or make "+(Math.ceil(cups*2)/2)+" cups (1:1 sugar & water)":"";
+      mixers.push({name:it.name,buy:Math.ceil(q/OZ750)+" × 750 mL",d:"≈ "+fmt(q)+" oz"+home+" · "+srcs});
+    } else if(it.type==="bitters"){
+      mixers.push({name:it.name,buy:Math.ceil(q/150)+" × 5 oz bottle",d:"≈ "+fmt(q)+" dashes · "+srcs});
+    } else if(it.type==="other"){
+      mixers.push({name:it.name,buy:Math.ceil(q/32)+" × quart",d:"≈ "+fmt(q)+" oz · "+srcs});
+    } else if(it.type==="garnish"){
+      var g=garnishUnit(it.name);
+      var gk=g.unit;
+      if(!garnishFruit[gk])garnishFruit[gk]={unit:g.unit,label:g.label,amount:0,parts:[]};
+      garnishFruit[gk].amount+=q/g.per; garnishFruit[gk].parts.push(it.name.toLowerCase()+" × "+fmt(q));
+    }
+  });
+  var garn=Object.keys(garnishFruit).map(function(k){var g=garnishFruit[k];return {name:g.label,buy:fmt(Math.ceil(g.amount))+" "+g.unit,d:g.parts.join(", ")}});
+  var byName=function(a,b){return a.name.localeCompare(b.name)};
+  liquor.sort(byName);mixers.sort(byName);garn.sort(byName);
+  R.liquor=liquor;R.wineExtra=wineExtra;R.mixers=mixers;R.garnish=garn;R.liquorBottles=liquorBottles;
+
+  // ice
+  var mixed=(sigD+stdD)*b;
+  var drinkIce=mixed*0.4 + R.beer.count*0 + (R.wine.glasses>0?0:0);
+  var chillIce=0;
+  if(S.chill){ chillIce = R.beer.cases*8 + (R.wine.white+R.wine.rose+(R.toast?R.toast.bottles:0))*1.5 + wineExtra.length*2; }
+  var mult={indoor:1,outdoor:1.25,hot:1.5}[S.weather]||1;
+  var ice=Math.max((drinkIce+chillIce)*mult, G>0?G*1*mult:0);
+  R.ice={lb:Math.ceil(ice/10)*10,bags10:Math.ceil(ice/10),bags20:Math.ceil(ice/20),drink:drinkIce*mult,chill:chillIce*mult};
+
+  // supplies
+  if(S.supplies){
+    R.supplies=[
+      mixed>0?{name:"Cocktail / rocks cups",buy:fmt(Math.ceil(mixed*1.15)),d:"1 per drink + 15% for refreshes & spills"}:null,
+      (R.wine.glasses>0||R.toast)?{name:"Wine / flute cups",buy:fmt(Math.ceil((R.wine.glasses+(R.toast?R.toast.pours:0))*1.15)),d:"Wine pours"+(R.toast?" + toast":"")}:null,
+            {name:"Cocktail napkins",buy:fmt(Math.ceil(total*b*1.5)),d:"1½ per drink"},
+      mixed>0?{name:"Straws / stirrers",buy:fmt(Math.ceil(mixed)),d:"1 per mixed drink"}:null,
+      G>0?{name:"Bottled water",buy:fmt(Math.ceil(G*Math.max(1,H/2))),d:"1 per guest every 2 hours"}:null
+    ].filter(Boolean);
+  } else R.supplies=null;
+
+  if(G>0&&drinkers<=0)R.warnings.push("Everyone is marked as not drinking — only water and supplies are calculated.");
+  return R;
+}
+function garnishUnit(name){
+  var n=name.toLowerCase();
+  if(/lime/.test(n))return {per:8,unit:"limes",label:"Limes"};
+  if(/lemon/.test(n))return {per:/peel|twist/.test(n)?6:8,unit:"lemons",label:"Lemons"};
+  if(/grapefruit/.test(n))return {per:8,unit:"grapefruit",label:"Grapefruit"};
+  if(/orange/.test(n))return {per:/peel|twist/.test(n)?6:8,unit:"oranges",label:"Oranges"};
+  if(/mint/.test(n))return /leaf|leaves/.test(n)?{per:40,unit:"bunches",label:"Mint"}:{per:12,unit:"bunches",label:"Mint"};
+  if(/cherr/.test(n))return {per:35,unit:"jars (~35 ct)",label:"Cocktail cherries"};
+  if(/olive/.test(n))return {per:40,unit:"jars (~40 ct)",label:"Olives"};
+  if(/cucumber/.test(n))return {per:20,unit:"cucumbers",label:"Cucumbers"};
+  if(/rosemary|thyme|basil|sage/.test(n))return {per:10,unit:"packs",label:name.replace(/\b(sprig|sprigs)\b/i,"").trim()||"Herbs"};
+  if(/coffee bean/.test(n))return {per:150,unit:"bags (4 oz)",label:"Coffee beans"};
+  if(/strawberr/.test(n))return {per:15,unit:"lb",label:"Strawberries"};
+  return {per:1,unit:"pcs",label:name.charAt(0).toUpperCase()+name.slice(1)};
+}
+
+/* ---------- rendering ---------- */
+function renderResults(){
+  var R=compute(S);
+  var title=S.eventName.trim()||"Your event";
+  var date="";
+  if(S.eventDate){var dt=new Date(S.eventDate+"T12:00:00");if(!isNaN(dt))date=dt.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});}
+  var styleName={light:"Light",moderate:"Moderate",heavy:"Party"}[S.style];
+  var h='<div class="card"><div class="rhead"><div><h2>'+esc(title)+'</h2><div class="meta">'+[date,fmt(R.G)+" guests",R.H+" hrs",styleName+" drinkers"].filter(Boolean).join(" · ")+'</div></div>'+
+    '<button class="btn sm" id="copyBtn" type="button">Copy list</button></div>';
+  h+='<div class="tiles">'+tile(fmt(R.total),"drinks")+tile(R.beer.cases,"beer cases")+tile(R.wine.total+(R.toast?R.toast.bottles:0)+R.wineExtra.reduce(function(a,x){return a+parseInt(x.buy)},0),"wine bottles")+tile(R.liquorBottles,"liquor (750s)")+tile(R.ice.bags10,"ice bags")+'</div>';
+  R.warnings.forEach(function(w){h+='<div class="warn">'+esc(w)+'</div>'});
+
+  if(R.beer.count>0){
+    h+=group("Beer","var(--beer)",[{name:"Beer",buy:R.beer.cases+" × 24-pack",d:"≈ "+fmt(R.beer.count)+" cans or bottles · split across 2–3 styles"}]);
+  }
+  var wl=[];
+  if(R.wine.red)wl.push({name:"Red wine",buy:R.wine.red+" × 750 mL",d:Math.round(OZ750/num(S.pourWine,5))+" glasses per bottle"});
+  if(R.wine.white)wl.push({name:"White wine",buy:R.wine.white+" × 750 mL",d:"Chill ahead"});
+  if(R.wine.rose)wl.push({name:"Rosé",buy:R.wine.rose+" × 750 mL",d:"Chill ahead"});
+  if(R.toast)wl.push({name:"Sparkling (toast)",buy:R.toast.bottles+" × 750 mL",d:R.toast.per+" toast pours per bottle"});
+  wl=wl.concat(R.wineExtra);
+  if(wl.length)h+=group("Wine & bubbly","var(--wine)",wl);
+  if(R.liquor.length)h+=group("Liquor","var(--cock)",R.liquor);
+  if(R.mixers.length)h+=group("Mixers, juices & syrups","#4a6fa5",R.mixers);
+  if(R.garnish.length)h+=group("Garnishes","#6c8a2b",R.garnish);
+  h+=group("Ice","#7fb3c8",[{name:"Ice",buy:R.ice.bags10+" × 10 lb bags",d:"or "+R.ice.bags20+" × 20 lb · ≈ "+fmt(R.ice.lb)+" lb ("+fmt(R.ice.drink)+" in drinks, "+fmt(R.ice.chill)+" chilling; minimum 1 lb per guest)"}]);
+  if(R.supplies)h+=group("Supplies","#9a8f82",R.supplies);
+
+  if(R.sigOut.length){
+    h+='<div class="group"><h3><i style="background:var(--gold)"></i>Signature drink servings</h3>';
+    R.sigOut.forEach(function(s){
+      var recipe=s.ings.filter(function(i){return i.amt>0}).map(function(i){return trim(i.amt)+" "+TYPES[i.type].unit+" "+(i.name||"?")}).join(", ");
+      h+='<div class="sigout"><div>'+esc(s.name)+'<small>'+esc(recipe)+'</small></div><b>~'+fmt(s.drinks)+' drinks</b></div>';
+    });
+    if(R.stdD>0)h+='<div class="sigout"><div>Standard mixed drinks<small>'+trim(num(S.pourSpirit,1.5))+' oz pour + '+trim(num(S.mixerOz,4))+' oz mixer</small></div><b>~'+fmt(R.stdD)+' drinks</b></div>';
+    h+='</div>';
+  }
+  h+='<p class="foot">'+fmt(R.drinkers)+' drinking guests × ~'+trim(Math.round(R.per*10)/10)+' drinks each = '+fmt(R.total/R.buffer)+' drinks, plus a '+Math.round((R.buffer-1)*100)+'% buffer. Pours: '+trim(num(S.pourSpirit,1.5))+' oz liquor, '+trim(num(S.pourWine,5))+' oz wine, 12 oz beer. Everything is rounded up to whole containers. Estimates only — always confirm with your venue and local rules.</p>';
+  h+='<div id="fallbackBox"></div>';
+  h+='<div class="promo"><h3><span class="sp">✦</span> Starting your own mobile bar? <span class="sp">✦</span></h3><p>Real advice from real experience — pricing, setup &amp; bookings.</p><p>No gatekeeping, no fluff 🥂</p><a class="cta" href="https://stan.store/themobilebarjourney" target="_blank" rel="noopener">Visit The Mobile Bar Journey →</a><span class="ig">@themobilebarjourney on Instagram</span></div></div>';
+  $("#results").innerHTML=h;
+  $("#copyBtn").addEventListener("click",function(){copyList(R,title,date)});
+  updateDynamicUI(R);
+}
+function tile(v,l){return '<div class="tile"><b>'+v+'</b><span>'+l+'</span></div>'}
+function trim(n){return String(Math.round(n*100)/100)}
+function group(title,color,rows){
+  return '<div class="group"><h3><i style="background:'+color+'"></i>'+esc(title)+'</h3><table class="list">'+rows.map(function(r){
+    return '<tr><td>'+esc(r.name)+'</td><td class="buy">'+esc(r.buy)+(r.d?'<span class="d">'+esc(r.d)+'</span>':'')+'</td></tr>'}).join("")+'</table></div>';
+}
+
+function copyList(R,title,date){
+  var L=[], line=function(r){L.push("☐ "+r.name+": "+r.buy)};
+  L.push(title.toUpperCase()+(date?" — "+date:""));
+  L.push(fmt(R.G)+" guests · "+R.H+" hrs · ~"+fmt(R.total)+" drinks");
+  var sec=function(name,rows){if(rows&&rows.length){L.push("");L.push(name.toUpperCase());rows.forEach(line)}};
+  if(R.beer.count>0)sec("Beer",[{name:"Beer",buy:R.beer.cases+" × 24-pack"}]);
+  var wl=[];if(R.wine.red)wl.push({name:"Red wine",buy:R.wine.red+" bottles"});if(R.wine.white)wl.push({name:"White wine",buy:R.wine.white+" bottles"});if(R.wine.rose)wl.push({name:"Rosé",buy:R.wine.rose+" bottles"});if(R.toast)wl.push({name:"Sparkling (toast)",buy:R.toast.bottles+" bottles"});
+  sec("Wine & bubbly",wl.concat(R.wineExtra));
+  sec("Liquor",R.liquor);sec("Mixers, juices & syrups",R.mixers);sec("Garnishes",R.garnish);
+  sec("Ice",[{name:"Ice",buy:R.ice.bags10+" × 10 lb bags"}]);
+  if(R.supplies)sec("Supplies",R.supplies);
+  if(R.sigOut.length){L.push("");L.push("SIGNATURE DRINKS");R.sigOut.forEach(function(s){L.push("• "+s.name+": ~"+fmt(s.drinks)+" drinks")})}
+  L.push("");L.push("Made with The Mobile Bar Journey Event Planner");L.push("IG: @themobilebarjourney · stan.store/themobilebarjourney");
+  var text=L.join("\n");
+  var done=function(){toast("Shopping list copied")};
+  var fail=function(){$("#fallbackBox").innerHTML='<p class="hint">Couldn\'t reach the clipboard — select the text below and copy it.</p><textarea class="fallback" readonly>'+esc(text)+'</textarea>';var t=$("#fallbackBox textarea");t.focus();t.select()};
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,fail)} else fail(); }catch(e){fail()}
+}
+var toastT;
+function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},1800)}
+
+function updateDynamicUI(R){
+  $$("[data-out]").forEach(function(el){el.textContent=getPath(el.getAttribute("data-out"))+"%"});
+  $$("[data-share]").forEach(function(el){el.value=getPath(el.getAttribute("data-share"))});
+  var bw=S.barType==="beerwine";
+  $("#cocktailShare").hidden=bw;
+  if(bw){var t=S.mix.beer+S.mix.wine||1;$('[data-out="mix.beer"]').textContent=Math.round(S.mix.beer/t*100)+"%";$('[data-out="mix.wine"]').textContent=Math.round(S.mix.wine/t*100)+"%";}
+  var sh=bw?{beer:S.mix.beer,wine:S.mix.wine,cocktail:0}:S.mix, tot=(sh.beer+sh.wine+sh.cocktail)||1;
+  $("#mixBar").innerHTML='<i style="width:'+sh.beer/tot*100+'%;background:var(--beer)"></i><i style="width:'+sh.wine/tot*100+'%;background:var(--wine)"></i><i style="width:'+sh.cocktail/tot*100+'%;background:var(--cock)"></i>';
+  $("#sigShareRow").hidden=!(S.barType==="full"&&S.sigs.length);
+  $("#sigCard").classList.toggle("dim",bw);
+  $("#sigHint").innerHTML=bw?"Signature drinks aren't poured on a beer &amp; wine bar — switch to a full or limited bar to include them.":"Enter each recipe for <b>one drink</b>. Amounts are in ounces unless the unit says otherwise.";
+  $$(".seg").forEach(function(seg){var k=seg.getAttribute("data-seg");$$("button",seg).forEach(function(b){b.classList.toggle("on",b.getAttribute("data-v")===S[k])})});
+  $("#styleHint").textContent=STYLES[S.style].hint;
+  $("#barHint").textContent=BAR_HINTS[S.barType];
+  $("#drinkersNote").textContent=R?("That's "+fmt(R.drinkers)+" drinking guests at ~"+trim(Math.round(R.per*10)/10)+" drinks each."):"";
+}
+
+function syncInputs(){
+  $$("[data-bind]").forEach(function(el){var k=el.getAttribute("data-bind");
+    if(el.type==="checkbox")el.checked=!!S[k]; else el.value=S[k];});
+  renderSpiritMix();renderSigs();
+}
+function renderSpiritMix(){
+  $("#spiritMix").innerHTML=S.spiritMix.map(function(x,i){return '<label class="f">'+esc(x.name)+'<input type="number" inputmode="numeric" min="0" max="100" data-sp="'+i+'" value="'+x.pct+'"></label>'}).join("");
+}
+function renderSigs(){
+  var box=$("#sigList");
+  if(!S.sigs.length){box.innerHTML='<p class="empty">No signature drinks yet. Pick a classic below and edit it, or start from scratch.</p>';return;}
+  box.innerHTML=S.sigs.map(function(s,i){
+    return '<div class="sig" data-i="'+i+'"><div class="sig-head">'+
+      '<input type="text" class="sig-name" data-f="name" value="'+esc(s.name)+'" placeholder="Drink name" aria-label="Drink name">'+
+      '<select data-f="weight" aria-label="Popularity">'+WEIGHTS.map(function(w){return '<option value="'+w.v+'"'+(num(s.weight,1)===w.v?" selected":"")+'>'+w.l+'</option>'}).join("")+'</select>'+
+      '<button type="button" class="icon" data-act="delsig" aria-label="Remove '+esc(s.name||"drink")+'">×</button></div>'+
+      '<div class="ings">'+s.ings.map(function(g,j){
+        return '<div class="ing" data-j="'+j+'">'+
+          '<input type="text" data-g="name" value="'+esc(g.name)+'" placeholder="Ingredient" aria-label="Ingredient">'+
+          '<input type="number" data-g="amt" inputmode="decimal" min="0" step="0.25" value="'+g.amt+'" aria-label="Amount">'+
+          '<span class="unit">'+TYPES[g.type].unit+'</span>'+
+          '<select data-g="type" aria-label="Type">'+Object.keys(TYPES).map(function(t){return '<option value="'+t+'"'+(g.type===t?" selected":"")+'>'+TYPES[t].label+'</option>'}).join("")+'</select>'+
+          '<button type="button" class="icon sm" data-act="deling" aria-label="Remove ingredient">×</button></div>'}).join("")+
+      '</div><button type="button" class="link" data-act="adding">+ Add ingredient</button></div>';
+  }).join("");
+}
+
+/* ---------- events ---------- */
+var saveT;
+function changed(){ renderResults(); clearTimeout(saveT); saveT=setTimeout(function(){store.set("pourplan.current",S)},250); }
+
+document.addEventListener("input",function(e){
+  var el=e.target, k;
+  if((k=el.getAttribute("data-bind"))){
+    if(el.type==="checkbox")S[k]=el.checked;
+    else if(el.type==="number"||el.type==="range"){ S[k]= (el.value===""&&k==="override")?"":(el.value===""?S[k]:num(el.value,S[k])); }
+    else S[k]=el.value;
+    changed(); return;
+  }
+  if((k=el.getAttribute("data-share"))){var p=k.split(".");setShare(p[0],p[1],num(el.value,0));changed();return;}
+  if(el.hasAttribute("data-sp")){S.spiritMix[+el.getAttribute("data-sp")].pct=Math.max(0,num(el.value,0));changed();return;}
+  var sig=el.closest&&el.closest(".sig");
+  if(sig){
+    var s=S.sigs[+sig.getAttribute("data-i")]; if(!s)return;
+    if(el.hasAttribute("data-f")){var f=el.getAttribute("data-f");s[f]=f==="weight"?num(el.value,1):el.value;}
+    else if(el.hasAttribute("data-g")){
+      var ing=s.ings[+el.closest(".ing").getAttribute("data-j")],g=el.getAttribute("data-g");
+      if(g==="amt")ing.amt=Math.max(0,num(el.value,0));
+      else if(g==="type"){ing.type=el.value;el.closest(".ing").querySelector(".unit").textContent=TYPES[ing.type].unit;}
+      else ing.name=el.value;
+    }
+    changed();
+  }
+});
+// selects fire "change" (and some browsers "input"); handle change for sig selects too
+document.addEventListener("change",function(e){
+  var el=e.target; if(el.tagName==="SELECT"&&el.closest(".sig")){el.dispatchEvent(new Event("input",{bubbles:true}));}
+  // tidy numeric inputs on blur/commit
+  var k=el.getAttribute&&el.getAttribute("data-bind");
+  if(k==="guests"){S.guests=clamp(Math.round(num(el.value,S.guests)),1,5000);el.value=S.guests;changed();}
+  if(k==="hours"){S.hours=clamp(num(el.value,S.hours),0.5,12);el.value=S.hours;changed();}
+  if(k==="nonDrinkPct"){S.nonDrinkPct=clamp(Math.round(num(el.value,S.nonDrinkPct)),0,90);el.value=S.nonDrinkPct;changed();}
+});
+
+document.addEventListener("click",function(e){
+  var el=e.target.closest("button"); if(!el)return;
+  var k;
+  if((k=el.getAttribute("data-step"))){
+    var d=num(el.getAttribute("data-d"),0), lim=k==="guests"?[1,5000]:[0.5,12];
+    S[k]=clamp(Math.round((num(S[k],0)+d)*2)/2,lim[0],lim[1]); if(k==="guests")S[k]=Math.round(S[k]);
+    $('[data-bind="'+k+'"]').value=S[k]; changed(); return;
+  }
+  var seg=el.closest(".seg");
+  if(seg){S[seg.getAttribute("data-seg")]=el.getAttribute("data-v");changed();return;}
+  if((k=el.getAttribute("data-preset"))){S.mix=clone(MIX_PRESETS[k]);changed();return;}
+  var act=el.getAttribute("data-act");
+  if(act){
+    var sigEl=el.closest(".sig"), i=+sigEl.getAttribute("data-i");
+    if(act==="delsig")S.sigs.splice(i,1);
+    if(act==="adding")S.sigs[i].ings.push({name:"",amt:1,type:"spirit"});
+    if(act==="deling")S.sigs[i].ings.splice(+el.closest(".ing").getAttribute("data-j"),1);
+    renderSigs(); changed();
+    if(act==="adding"){var rows=$$('.sig[data-i="'+i+'"] .ing');var last=rows[rows.length-1];if(last)last.querySelector("input").focus();}
+    return;
+  }
+});
+
+// preset picker
+$("#presetSel").innerHTML='<option value="">Blank recipe</option>'+Object.keys(PRESETS).map(function(n){return '<option>'+esc(n)+'</option>'}).join("");
+$("#addSigBtn").addEventListener("click",function(){
+  var p=$("#presetSel").value;
+  var ings=p?PRESETS[p].map(function(r){return {name:r[0],amt:r[1],type:r[2]}}):[{name:"",amt:2,type:"spirit"},{name:"",amt:3,type:"mixer"},{name:"",amt:1,type:"garnish"}];
+  S.sigs.push({id:uid(),name:p||"",weight:1,ings:ings});
+  renderSigs(); changed();
+  var all=$$(".sig"); var last=all[all.length-1]; if(last&&!p)last.querySelector(".sig-name").focus();
+});
+$("#resetAdv").addEventListener("click",function(){for(var k in ADV_DEFAULTS)S[k]=clone(ADV_DEFAULTS[k]);syncInputs();changed();toast("Advanced settings reset")});
+
+// saved events
+function savedAll(){return store.get("pourplan.events")||{}}
+function refreshSaved(sel){
+  var all=savedAll(),names=Object.keys(all).sort();
+  $("#savedSel").innerHTML='<option value="">Saved events…</option>'+names.map(function(n){return '<option'+(n===sel?" selected":"")+'>'+esc(n)+'</option>'}).join("");
+  $("#delBtn").hidden=!sel;
+}
+$("#saveBtn").addEventListener("click",function(){
+  var name=S.eventName.trim();
+  if(!name){toast("Give the event a name first");$('[data-bind="eventName"]').focus();return;}
+  var all=savedAll(); all[name]=clone(S);
+  if(store.set("pourplan.events",all)){refreshSaved(name);toast("Saved “"+name+"”")} else toast("This browser won't save — use Copy list instead");
+});
+$("#savedSel").addEventListener("change",function(){
+  var n=this.value; $("#delBtn").hidden=!n; delArm=false; $("#delBtn").textContent="Delete";
+  if(!n)return; var all=savedAll(); if(all[n]){S=sanitize(all[n]);syncInputs();changed();toast("Loaded “"+n+"”")}
+});
+$("#newBtn").addEventListener("click",function(){S=clone(DEFAULTS);syncInputs();changed();refreshSaved("");toast("Started a new event")});
+var delArm=false;
+$("#delBtn").addEventListener("click",function(){
+  var n=$("#savedSel").value; if(!n)return;
+  if(!delArm){delArm=true;this.textContent="Tap again to delete";var b=this;setTimeout(function(){delArm=false;b.textContent="Delete"},3000);return;}
+  var all=savedAll(); delete all[n]; store.set("pourplan.events",all); delArm=false; this.textContent="Delete"; refreshSaved(""); toast("Deleted “"+n+"”");
+});
+$("#jump").addEventListener("click",function(){$("#results").scrollIntoView({behavior:"smooth"})});
+if("IntersectionObserver" in window){
+  new IntersectionObserver(function(en){$("#jump").style.display=en[0].isIntersecting?"none":""}).observe($("#results"));
+}
+
+// expose for testing
+window.__pourplan={compute:compute,get S(){return S}};
+
+syncInputs(); refreshSaved(""); renderResults();
+})();
+</script>
+</body>
+</html>
